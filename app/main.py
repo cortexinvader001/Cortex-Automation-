@@ -9,7 +9,7 @@ log_manager = LogManager()
 
 @app.route("/")
 def index():
-    return send_file("../frontend.html")
+    return send_file("../index.html")
 
 @app.route("/save_project/<name>")
 def save_project(name):
