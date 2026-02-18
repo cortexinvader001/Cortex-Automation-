@@ -2,6 +2,7 @@ from seleniumbase import SB
 import os
 import subprocess
 import time
+from selenium.webdriver.common.keys import Keys
 
 os.environ["DISPLAY"] = ":99"
 
@@ -52,7 +53,7 @@ class BrowserEngine:
             self.sb.send_keys(selector, ch)
             self.sb.sleep(0.05)
         self.sb.sleep(0.4)
-        self.sb.press_enter(selector)
+        self.sb.send_keys(selector,Keys.ENTER)
         return {"success": True, "message": f"Typed into {selector}"}
     
     def wait(self, seconds: float):
