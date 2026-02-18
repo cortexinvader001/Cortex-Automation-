@@ -1,20 +1,25 @@
 from seleniumbase import SB
 
+
 class BrowserEngine:
     def __init__(self):
+        # Start persistent SeleniumBase session
         self.sb = SB(
-    uc=True,
-    headed=False,
-    browser="chrome",
-    chromium_arg=[
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--window-size=1200,900",
-        "--headless=new"  # do NOT set remote-debugging-port
-    ]
-)
-self.sb.__enter__()
+            uc=True,
+            headed=False,
+            browser="chrome",
+            chromium_arg=[
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--window-size=1200,900",
+                "--headless=new"
+            ]
+        )
+        # Manually enter the context (since we want persistence)
+        self.sb.__enter__()
+
+    # -------- Core Controls -------- #
 
     def open(self, url: str):
         self.sb.open(url)
@@ -36,6 +41,8 @@ self.sb.__enter__()
         self.sb.refresh()
         return {"success": True, "message": "Refreshed page"}
 
+    # -------- Data Extraction -------- #
+
     def get_screenshot_base64(self):
         return self.sb.driver.get_screenshot_as_base64()
 
@@ -46,7 +53,16 @@ self.sb.__enter__()
         for cookie in cookies:
             try:
                 self.sb.driver.add_cookie(cookie)
-            except:
+            except Exception:
                 pass
+
         self.sb.refresh()
         return {"success": True, "message": f"Loaded {len(cookies)} cookies"}
+
+    # -------- Proper Shutdown -------- #
+
+    def close(self):
+        """Cleanly stop browser (IMPORTANT)."""
+        if self.sb:
+            self.sb.__exit__(None, None, None)
+            self.sb = None
