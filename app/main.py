@@ -2,6 +2,7 @@ from flask import Flask, jsonify, send_file
 from flask_socketio import SocketIO, emit
 from app.core.executor import execute_command
 from app.logging.logger import LogManager
+import json, io
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
