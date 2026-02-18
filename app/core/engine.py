@@ -2,7 +2,15 @@ from seleniumbase import SB
 
 class BrowserEngine:
     def __init__(self):
-        self.sb = SB(uc=True, headed=False, browser="chrome")
+        self.sb = SB(uc=True, headed=False, browser="chrome", chromium_arg=[
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--window-size=1200,900",
+        "--headless=new",              # modern headless mode
+        "--disable-dev-shm-usage",     # repeated for emphasis
+        "--remote-debugging-port=0"    # disable remote debugging port
+        ])
         self.sb.__enter__()
 
     def open(self, url: str):
