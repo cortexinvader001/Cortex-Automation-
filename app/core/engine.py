@@ -32,8 +32,8 @@ class BrowserEngine:
         if chromedriver_path:
             os.environ["CHROMEDRIVER_PATH"] = chromedriver_path
 
-        self.sb = SB(**sb_kwargs)
-        self.sb.__enter__()
+        self.sb_cm = SB(**sb_kwargs)
+        self.sb = self.sb_cm.__enter__()
 
     # -------- Core Controls -------- #
 
@@ -79,6 +79,7 @@ class BrowserEngine:
 
     def close(self):
         """Cleanly stop browser (IMPORTANT)."""
-        if self.sb:
-            self.sb.__exit__(None, None, None)
+        if self.sb_cm:
+            self.sb_cm.__exit__(None, None, None)
+            self.sb_cm = None
             self.sb = None
