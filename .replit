@@ -1,0 +1,7 @@
+modules = ["web", "python-3.11"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+packages = ["alsa-lib", "at-spi2-atk", "chromedriver", "chromium", "gtk3", "iana-etc", "liberation_ttf", "nss", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "xorg.libXrender", "xorg.libxcb", "xvfb-run"]

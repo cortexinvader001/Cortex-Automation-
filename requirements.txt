@@ -2,3 +2,7 @@ Flask
 flask-socketio
 eventlet
 seleniumbase
+eventlet
+Flask
+flask-socketio
+seleniumbase
