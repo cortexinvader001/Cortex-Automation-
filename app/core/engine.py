@@ -1,5 +1,6 @@
 from seleniumbase import SB
-
+import os
+os.environ["DISPLAY"]=":99"
 
 class BrowserEngine:
     def __init__(self):
