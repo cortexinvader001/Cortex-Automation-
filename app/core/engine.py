@@ -1,6 +1,7 @@
 from seleniumbase import SB
 import os
 import subprocess
+import time
 
 os.environ["DISPLAY"] = ":99"
 
@@ -46,7 +47,9 @@ class BrowserEngine:
         return {"success": True, "message": f"Clicked {selector}"}
 
     def type(self, selector: str, text: str):
-        self.sb.type(selector, text, human=True)
+        self.sb.human_type(selector, text,)
+        time.sleep(2)
+        self.sb.press_enter(selector)
         return {"success": True, "message": f"Typed into {selector}"}
 
     def wait(self, seconds: float):
