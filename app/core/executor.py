@@ -1,4 +1,7 @@
 from .engine import BrowserEngine
+import shlex
+import json
+import time
 
 engine = None
 
@@ -14,35 +17,59 @@ def execute_command(cmd: str):
         raise ValueError("Empty command")
 
     parts = cmd.split(maxsplit=1)
-    action = parts[0].lower()
+    action = parts[0]
     arg = parts[1] if len(parts) > 1 else ""
-
     eng = _get_engine()
     log_step = None
+
     try:
-        if action == "open":
+        action_lower = action.lower()
+
+        # --- Built-in wrappers ---
+        if action_lower == "open":
             res = eng.open(arg)
-        elif action == "click":
+        elif action_lower == "click":
             res = eng.click(arg)
-        elif action == "type":
-            selector, _, text = arg.partition(" ")
+        elif action_lower == "type":
+            args_list = shlex.split(arg)
+            selector = args_list[0]
+            text = " ".join(args_list[1:])
             res = eng.type(selector, text)
-        elif action == "wait":
+        elif action_lower == "wait":
             res = eng.wait(float(arg))
-        elif action == "refresh":
+        elif action_lower == "refresh":
             res = eng.refresh()
+        elif action_lower == "get_cookies":
+            res = {"cookies": eng.get_cookies(), "message": "Cookies fetched"}
+        elif action_lower == "add_cookies":
+            url, _, cookie_data = arg.partition(" ")
+            cookies = json.loads(cookie_data)
+            res = eng.add_cookies(url, cookies)
+        elif action_lower == "close":
+            eng.close()
+            global engine
+            engine = None
+            res = {"message": "Browser closed"}
+
+        # --- Dynamic SB passthrough ---
         else:
-            raise ValueError(f"Unknown command {action}")
+            args_list = shlex.split(arg)
+            result = eng.sb_action(action_lower, *args_list)
+            res = {"message": f"Called {action_lower} with args {args_list}", "result": result}
 
         log_step = {"action": action.upper(), "arg": arg}
         return {
             "success": True,
             "log_step": log_step,
-            "message": res["message"],
+            "message": res.get("message", ""),
+            "result": res.get("result"),
+            "cookies": res.get("cookies"),
             "screenshot": eng.get_screenshot_base64()
         }
+
     except Exception as e:
         try:
+            time.sleep(1)
             screenshot = eng.get_screenshot_base64()
         except Exception:
             screenshot = ""
