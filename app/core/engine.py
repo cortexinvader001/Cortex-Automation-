@@ -47,11 +47,14 @@ class BrowserEngine:
         return {"success": True, "message": f"Clicked {selector}"}
 
     def type(self, selector: str, text: str):
-        self.sb.human_type(selector, text)
-        time.sleep(2)
+        self.sb.click(selector)
+        for ch in text:
+            self.sb.send_keys(selector, ch)
+            self.sb.sleep(0.05)
+        self.sb.sleep(0.4)
         self.sb.press_enter(selector)
         return {"success": True, "message": f"Typed into {selector}"}
-
+    
     def wait(self, seconds: float):
         self.sb.sleep(seconds)
         return {"success": True, "message": f"Waited {seconds}s"}
