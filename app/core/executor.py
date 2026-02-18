@@ -1,6 +1,12 @@
 from .engine import BrowserEngine
 
-engine = BrowserEngine()
+engine = None
+
+def _get_engine():
+    global engine
+    if engine is None:
+        engine = BrowserEngine()
+    return engine
 
 def execute_command(cmd: str):
     cmd = cmd.strip()
@@ -11,19 +17,20 @@ def execute_command(cmd: str):
     action = parts[0].lower()
     arg = parts[1] if len(parts) > 1 else ""
 
+    eng = _get_engine()
     log_step = None
     try:
         if action == "open":
-            res = engine.open(arg)
+            res = eng.open(arg)
         elif action == "click":
-            res = engine.click(arg)
+            res = eng.click(arg)
         elif action == "type":
             selector, _, text = arg.partition(" ")
-            res = engine.type(selector, text)
+            res = eng.type(selector, text)
         elif action == "wait":
-            res = engine.wait(float(arg))
+            res = eng.wait(float(arg))
         elif action == "refresh":
-            res = engine.refresh()
+            res = eng.refresh()
         else:
             raise ValueError(f"Unknown command {action}")
 
@@ -32,12 +39,16 @@ def execute_command(cmd: str):
             "success": True,
             "log_step": log_step,
             "message": res["message"],
-            "screenshot": engine.get_screenshot_base64()
+            "screenshot": eng.get_screenshot_base64()
         }
     except Exception as e:
+        try:
+            screenshot = eng.get_screenshot_base64()
+        except Exception:
+            screenshot = ""
         return {
             "success": False,
             "message": str(e),
-            "screenshot": engine.get_screenshot_base64(),
+            "screenshot": screenshot,
             "log_step": None
         }

@@ -1,23 +1,38 @@
 from seleniumbase import SB
 import os
-os.environ["DISPLAY"]=":99"
+import subprocess
+
+os.environ["DISPLAY"] = ":99"
+
+def _find_binary(name):
+    result = subprocess.run(["which", name], capture_output=True, text=True)
+    return result.stdout.strip() if result.returncode == 0 else None
 
 class BrowserEngine:
     def __init__(self):
-        # Start persistent SeleniumBase session
-        self.sb = SB(
-            uc=True,
-            headed=False,
-            browser="chrome",
-            chromium_arg=[
+        chromium_path = _find_binary("chromium") or _find_binary("chromium-browser")
+        chromedriver_path = _find_binary("chromedriver")
+
+        sb_kwargs = {
+            "uc": False,
+            "headed": False,
+            "browser": "chrome",
+            "chromium_arg": [
                 "--no-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-gpu",
                 "--window-size=1200,900",
-                "--headless=new"
-            ]
-        )
-        # Manually enter the context (since we want persistence)
+                "--headless=new",
+                "--disable-setuid-sandbox",
+                "--disable-extensions",
+            ],
+        }
+        if chromium_path:
+            sb_kwargs["binary_location"] = chromium_path
+        if chromedriver_path:
+            os.environ["CHROMEDRIVER_PATH"] = chromedriver_path
+
+        self.sb = SB(**sb_kwargs)
         self.sb.__enter__()
 
     # -------- Core Controls -------- #
