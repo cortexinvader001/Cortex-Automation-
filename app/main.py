@@ -2,13 +2,13 @@ from flask import Flask, jsonify, send_file
 from flask_socketio import SocketIO, emit
 from app.core.executor import execute_command
 from app.logging.logger import LogManager
-import json, io
+import json, io, tempfile
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 log_manager = LogManager()
 
-@app.route("/")
+@app.route("")
 def index():
     return send_file("../index.html")
 
@@ -31,12 +31,14 @@ def list_projects():
                         meta["steps"] = len(json.load(f))
                 projects.append(meta)
     return jsonify(projects)
+
 @app.route("/download_log")
 def download_current_log():
-    log_bytes = io.BytesIO()
-    log_bytes.write(json.dumps(log_manager.current_log, indent=2).encode("utf-8"))
-    log_bytes.seek(0)
-    return send_file(log_bytes, mimetype="application/json", as_attachment=True, download_name="current_log.json")
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        json.dump(log_manager.current_log, f, indent=2)
+        temp_path = f.name
+    return send_file(temp_path, mimetype="application/json", as_attachment=True, download_name="current_log.json")
+
 @socketio.on("execute_command")
 def handle_command(data):
     cmd = data.get("cmd", "")
